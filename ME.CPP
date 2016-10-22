@@ -1,0 +1,3056 @@
+/*
+Some common variables used:
+
+[1](int) switchchoice	-	to store the value of choice variable
+[2](int) flag,ctr	-	used as a counter
+[3](int) i,j,k		-	loop variables
+
+Global variables:
+
+[1](char)categoryarr[i][j]-	store the list of categories of items
+[2](char)pccategory[i][j] -     store the list of pc-categories
+[3](char)str[i]		  -	store the no of digits of serial
+[4](char)binarychoice	  -	used to take a Yes/No answer
+[5](int) pricearr	  -	specify range of price for each category in each pc-category
+[6](int) choice		  -     store the choice of the user
+[7](int) place		  -     store the no of bytes to target object from the beginning
+[8](int) quantity	  -     store the quantity of items to be bought or sold
+[9](int) errorcode	  -     used as a switch (0 or 1)
+[10](int) serial	  -     used for printing serial no
+*/
+
+//Header files being used
+
+#include<fstream.h>
+#include<conio.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<iomanip.h>
+#include<dos.h>
+#include<graphics.h>
+#include<process.h>
+
+char categoryarr[14][17]={"Chassis","Motherboard","RAM","Hard Disk Drive","DVD Writer","Graphics Card","Processor","SMPS","Keyboard","Mouse","Speakers","UPS","Monitor","Operating System"};
+char pccategoryarr[4][11]={"Home PC","HTPC","Mid Range","High End"};
+char str[10],binarychoice;
+
+int pricearr[5][14]={   0   ,0	 ,0   ,0   ,0	,0   ,0	  ,0   ,0  ,0  ,0   ,0	 ,0   ,0,
+			2500,4500,1500,5000,1000,3000,5500,1000,600,300,1000,2500,7000,4500,
+			5000,8000,3000,7500,2000,10000,8000,3500,1000,500,3000,3500,9000,6500,
+			7500,11000,4000,10000,3000,15000,10000,6000,2000,1500,5500,4500,11000,7500,
+			10000,16000,5000,14000,4000,30000,12000,8500,3500,2000,6500,5000,13000,9000	};
+
+int choice,place,quantity,errorcode=0,serial;
+
+class item
+{
+	char category[17];
+	char compname[21];
+	char partno[11];
+	float price;
+	char pccategory[11];
+
+    public:
+	char* getcategory()
+	{
+		return category;
+	}
+	char setcategory()
+	{
+		strcpy(category,categoryarr[choice-1]);
+	}
+	char* getcompname()
+	{
+		return compname;
+	}
+	void setcompname()
+	{
+		itemcompnamelbl:
+
+		cout<<"\nEnter the company name:\t";
+		gets(compname);
+
+		if(strlen(compname)>20)
+		{
+			cout<<"\nEnter a string less than 21 characters\n";
+			getch();
+			goto itemcompnamelbl;
+		}
+	}
+	char* getpartno()
+	{
+		return partno;
+	}
+	void setpartno()
+	{
+		itempartnolbl:
+
+		cout<<"\nEnter the part no:\t";
+		gets(partno);
+
+		if(strlen(partno)>10)
+		{
+			cout<<"\nEnter a string less than 11 characters\n";
+			getch();
+			goto itempartnolbl;
+		}
+	}
+	float getprice()
+	{
+		return price;
+	}
+	void setprice()
+	{
+		cout<<"\nEnter the price in Rs:\t";
+		cin>>price;
+	}
+	char* getpccategory()
+	{
+		return pccategory;
+	}
+	void setpccategory()
+	{
+		if(price>pricearr[0][choice-1] && price<=pricearr[1][choice-1])
+		{
+			strcpy(pccategory,"Home PC");
+		}
+		else if(price>pricearr[1][choice-1] && price<=pricearr[2][choice-1])
+		{
+			strcpy(pccategory,"HTPC");
+		}
+		else if(price>pricearr[2][choice-1] && price<=pricearr[3][choice-1])
+		{
+			strcpy(pccategory,"Mid Range");
+		}
+		else    strcpy(pccategory,"High End");
+	}
+	void output()
+	{
+		cout<<setw(25)<<compname<<setw(15)<<partno<<"Rs ";
+		cprintf("%-13.2f",price);
+		cout<<pccategory;
+	}
+}o1,o2;
+
+class vendor
+{
+	char category[17];
+	char vendorname[21];
+	int moq;
+
+     public:
+	char* getcategory()
+	{
+		return category;
+	}
+	char setcategory()
+	{
+		strcpy(category,categoryarr[choice-1]);
+	}
+	char* getvendorname()
+	{
+		return vendorname;
+	}
+	void setvendorname()
+	{
+		vendorvendornamelbl:
+
+		cout<<"\nEnter the company name:\t";
+		gets(vendorname);
+
+		if(strlen(vendorname)>20)
+		{
+			cout<<"\nEnter a string less than 21 characters\n";
+			getch();
+			goto vendorvendornamelbl;
+		}
+	}
+	int getmoq()
+	{
+		return moq;
+	}
+	void setmoq()
+	{
+		cout<<"\nEnter the minimum order quantity of the vendor in this category:\t";
+		cin>>moq;
+	}
+	void output()
+	{
+		cout<<setw(30)<<vendorname<<moq;
+	}
+}a1,a2;
+
+class purchaseorderno
+{
+	int ponumber;
+
+     public:
+	purchaseorderno()
+	{
+		ponumber=1000;
+	}
+	int getponumber()
+	{
+		return ponumber;
+	}
+	void setponumber()
+	{
+		ponumber++;
+	}
+}p1;
+
+class inventory
+{
+	char category[17];
+	char compname[21];
+	char partno[11];
+	int quant;
+	float price;
+	float cost;
+	char pccategory[11];
+
+    public:
+	inventory()
+	{
+		quant=0;
+	}
+	char* getcategory()
+	{
+		return category;
+	}
+	char setcategory()
+	{
+		strcpy(category,o1.getcategory());
+	}
+	char* getcompname()
+	{
+		return compname;
+	}
+	char* getpartno()
+	{
+		return partno;
+	}
+	int getquant()
+	{
+		return quant;
+	}
+	float getprice()
+	{
+		return price;
+	}
+	float getcost()
+	{
+		return cost;
+	}
+	void setcompname()
+	{
+		strcpy(compname,o1.getcompname());
+	}
+	void setpartno()
+	{
+		strcpy(partno,o1.getpartno());
+	}
+	void setquantadd()
+	{
+		quant+=quantity;
+	}
+	void setquantdiff()
+	{
+		quant-=quantity;
+	}
+	void setprice()
+	{
+		price=o1.getprice();
+	}
+	void setcost()
+	{
+		cost=quant*o1.getprice();
+	}
+	void setcost1()
+	{
+		cost=quant*price;
+	}
+	char* getpccategory()
+	{
+		return pccategory;
+	}
+	void setpccategory()
+	{
+		strcpy(pccategory,o1.getpccategory());
+	}
+	void output()
+	{
+		cprintf("%-23s",compname);
+		cprintf("%-15s",partno);
+		cprintf("%-7i",quant);
+		cprintf("Rs ");
+		cprintf("%-12.2f",cost);
+		cprintf("%s",pccategory);
+		cout<<endl;
+	}
+	void outputsell()
+	{
+		cout<<setw(25)<<compname<<setw(17)<<partno<<setw(11);
+		cout<<quantity<<"Rs "<<cost<<endl;
+	}
+}i1,i2;
+
+class dop
+{
+	int dd;
+	int mm;
+	int yy;
+
+     public:
+	void setdate()
+	{
+		struct date d;
+		getdate(&d);
+		dd=d.da_day;
+		mm=d.da_mon;
+		yy=d.da_year;
+	}
+	void output()
+	{
+		printf("%02d/",dd);
+		printf("%02d/",mm);
+		cout<<yy;
+	}
+}d1;
+
+class history
+{
+	int ponumber;
+	dop d2;
+	char category[17];
+	char compname[21];
+	char partno[11];
+	int quant;
+	float cost;
+	char pccategory[11];
+	char vendorname[21];
+
+     public:
+	history()
+	{
+		quant=0;
+	}
+	char setcategory()
+	{
+		strcpy(category,o1.getcategory());
+	}
+	int getponumber()
+	{
+		return ponumber;
+	}
+	void setponumber()
+	{
+		ifstream fin("ponumber.dat",ios::binary|ios::in);
+		if(!fin)
+		{
+			cout<<"\nError in opening the file 'ponumber' in read mode";
+			return;
+		}
+
+		while(fin.read((char*)&p1,sizeof(p1)))
+		{
+			if(fin.eof())
+				break;
+
+			ponumber=p1.getponumber();
+		}
+
+		fin.close();
+	}
+	void setdop()
+	{
+		d2=d1;
+	}
+	void setcompname()
+	{
+		strcpy(compname,o1.getcompname());
+	}
+	void setpartno()
+	{
+		strcpy(partno,o1.getpartno());
+	}
+	void setquant()
+	{
+		quant+=quantity;
+	}
+	void setcost()
+	{
+		cost=quant*o1.getprice();
+	}
+	void setpccategory()
+	{
+		strcpy(pccategory,o1.getpccategory());
+	}
+	void setvendorname()
+	{
+		strcpy(vendorname,a1.getvendorname());
+	}
+	void output()
+	{
+		int j;
+
+		cout<<"\n";
+
+		for(j=0;j<80;j++)
+		{
+			cout<<"-";
+			delay(20);
+		}
+
+		cout<<setw(20)<<"\nPO number:"<<"PCN/"<<ponumber;
+		cout<<setw(20)<<"\nDate of Purchase:";
+		d2.output();
+		cout<<setw(20)<<"\nCategory:"<<category;
+		cout<<setw(20)<<"\nCompany name:"<<compname;
+		cout<<setw(20)<<"\nPart no:"<<partno;
+		cout<<setw(20)<<"\nQuantity:"<<quant;
+		cout<<setw(20)<<"\nTotal cost:"<<"Rs "<<cost;
+		cout<<setw(20)<<"\nPC Category:"<<pccategory;
+		cout<<setw(20)<<"\nVendor:"<<vendorname<<"\n\n";
+
+		for(j=0;j<80;j++)
+		{
+			cout<<"-";
+			delay(20);
+		}
+
+		cout<<"\n";
+	}
+
+}h2;
+
+
+/*
+how to prevent buying of more than the range of int
+
+setw() value changes on bringing the category field above the headings
+(think about it too)[func:inventorystock()]
+
+
+*/
+
+
+void itemlist()			//Displays list of all categories
+{
+	cout<<"\n\nCPU components:";
+	cout<<setw(30)<<"\n[1]Chassis"<<"[2]Motherboard";
+	cout<<setw(30)<<"\n[3]RAM"<<"[4]Hard Disk Drive";
+	cout<<setw(30)<<"\n[5]DVD Writer"<<"[6]Graphics Card";
+	cout<<setw(30)<<"\n[7]Processor"<<"[8]SMPS";
+
+	cout<<"\n\nNon CPU components:";
+	cout<<setw(30)<<"\n[9]Keyboard"<<"[10]Mouse";
+	cout<<setw(30)<<"\n[11]Speakers"<<"[12]UPS";
+	cout<<setw(30)<<"\n[13]Monitor"<<"[14]Operating System";
+	cout<<"\n\n[15]None and go back";
+
+	cout<<"\n\n\tEnter your choice:\t";
+	cin>>choice;
+}
+
+void displayitems(int code)	//To display the details of vendors
+{
+	//code=0 or 1
+	int ctr=0,flag=code;
+
+	serial=0;
+
+	fstream fin("item.dat", ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'item' in read mode";
+		return;
+	}
+
+	while(fin.read((char*)&o2,sizeof(o2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(!strcmpi(o2.getcategory(),categoryarr[choice-1]))
+		{
+			if(serial%43==1 && serial!=1)
+			{
+				cout<<"\n\nPress 'C' to continue or any other key to go back\t";
+				cin>>binarychoice;
+
+				if(binarychoice=='C' || binarychoice=='c')
+				{
+					ctr=0;
+					clrscr();
+				}
+				else
+				{
+					errorcode=1;
+					fin.close();
+					return;
+				}
+			}
+
+			ctr++;
+
+			if(ctr==1)
+			{
+				cout<<setw(9)<<"\n\nSr.No"<<setw(25)<<"Company name";
+				cout<<setw(15)<<"Part no"<<setw(16)<<"Price"<<"PC Category"<<endl;
+			}
+
+			cout<<"\n["<<++serial;
+
+			itoa(serial,str,10);
+
+			cout<<setw(6-strlen(str))<<"]";
+			o2.output();
+		}
+	}
+
+	fin.close();
+
+	if(ctr==0)
+	{
+		cout<<"\nNo items exist in this category";
+		getch();
+		errorcode=1;
+	}
+	if(flag!=1)
+		cout<<"\n\n["<<++serial<<"]None and go back\n";
+}
+
+void displayvendors(int code)	//To display the details of vendors
+{
+	//code=0 or 1
+	int ctr=0,flag=code;
+
+	serial=0;
+
+	fstream fin("vendor.dat", ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'vendor' in read mode";
+		return;
+	}
+
+	while(fin.read((char*)&a2,sizeof(a2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(!strcmpi(a2.getcategory(),categoryarr[choice-1]))
+		{
+			if(serial%43==1 && serial!=1)
+			{
+				cout<<"\n\nPress 'C' to continue or any other key to go back\t";
+				cin>>binarychoice;
+
+				if(binarychoice=='C' || binarychoice=='c')
+				{
+					ctr=0;
+					clrscr();
+				}
+				else
+				{
+					errorcode=1;
+					fin.close();
+					return;
+				}
+			}
+
+			ctr++;
+
+			if(ctr==1)
+				cout<<setw(14)<<"\n\nSr.No"<<setw(30)<<"Vendor name"<<"Moq"<<endl;
+
+			cout<<"\n["<<++serial;
+
+			itoa(serial,str,10);
+
+			cout<<setw(11-strlen(str))<<"]";
+			a2.output();
+		}
+	}
+
+	fin.close();
+
+	if(ctr==0)
+	{
+		cout<<"\nNo vendors exist in this category";
+		getch();
+		errorcode=1;
+	}
+	if(flag!=1)
+		cout<<"\n\n["<<++serial<<"]None and go back\n";
+}
+
+void help()		//Readme file
+{
+	helplbl:
+
+	int i,j,k;
+
+	clrscr();
+
+	cout<<"\n\t\t\t\tHELP FILE";
+	cout<<"\n\nContents: ";
+	cout<<"\n\n[1]Overview";
+	cout<<"\n[2]Buy an Item";
+	cout<<"\n[3]Check the Inventory";
+	cout<<"\n[4]Sell a PC";
+	cout<<"\n[5]Service Menu";
+	cout<<"\n[6]Price ranges";
+	cout<<"\n[7]Back to Main Menu";
+	cout<<"\n\n\tEnter Your Choice:\t";
+
+	cin>>choice;
+
+	switch(choice)
+	{
+		case 1:	{
+				clrscr();
+
+				cout<<"\n\t\t\tOverview of the Program";
+				cout<<"\n\nThis program is an attempted simulation of real life";
+				cout<<" application based program.";
+				cout<<"\n\nIt is a program that simulates inventory management and the functions of";
+				cout<<" buying\nand selling which exist in most business environments.";
+				cout<<"\n\nThe program grants the user complete and absolute control over the working of";
+				cout<<"\nthe program and gives him/her a fairly accurate feel of the real application.";
+				cout<<"\n\nIt efficiently combines the essential elements of classes, data file handling,";
+				cout<<"\nfunctions etc. integral to any program and showcases the programmer's";
+				cout<<"\nunderstanding of the above mentioned topics.";
+				cout<<"\n\nThis project has been done by Durgesh Kumar Babal and Surya P Palavalasa";
+				cout<<" of\nclass XII A as part of their Computer Science Project for the AISSCE exam";
+				cout<<"\nconducted by the Central Board of Secondary Examination in the year 2014.";
+
+				break;
+			}
+
+		case 2:	{
+				clrscr();
+
+				cout<<"\n\t\t\t\tBuy an Item";
+				cout<<"\n\nThis feature allows the user to buy individual components (such as RAM,";
+				cout<<"\nMotherboard, Hard Disk Drive etc.) of a computer from a list of items that";
+				cout<<" can\nbe updated by the user from the service menu.";
+				cout<<"\n\nThe details of the item, vendor and quantity are to be entered by the user";
+				cout<<"\nfollowing which an invoice is generated. Accepting the above invoice results in ";
+				cout<<"the delivery of the item following which the inventory and history of the";
+				cout<<"\ntransaction are updated accordingly.\n\nThe Declining of the invoice gives the user";
+				cout<<" the option to change any detail of\nhis/her choice and redo the transaction.";
+
+				break;
+			}
+
+		case 3:	{
+				clrscr();
+
+				cout<<"\n\t\t\t\tCheck the Inventory";
+				cout<<"\n\nAll items purchased are added to the stockpile in the inventory. The details";
+				cout<<" of all the items in the inventory can be viewed sorted according to categories (of";
+				cout<<"\ncomputer parts) from 'List of Items in Stock' feature.";
+				cout<<"\n\nAn option to view a consolidated report of all the items also exists ";
+				cout<<"which showsthe user the number of each category of items in each pc-category.";
+				cout<<"On continuing the user is given various useful statistics about the inventory in a concise";
+				cout<<"\nmanner. These include total no. of items, total no. of items in each category,\ntotal no.";
+				cout<<" of assemblable PC's in each pc-category and the total inventory value.";
+				cout<<"\nAll the details of any transactions that have taken place are stored in a";
+				cout<<" file. The same can be viewed from 'History of Purchase' feature";
+				cout<<" Any transaction detailcan be deleted by identifying it's PO number through";
+				cout<<" the 'Delete History by\nPO number' feature.";
+				cout<<"\n\nAlternatively full transaction";
+				cout<<" history can be deleted at once through the\n'Delete full History' feature.";
+
+				break;
+			}
+
+		case 4:	{
+				clrscr();
+
+				cout<<"\n\t\t\t\tSell a PC";
+				cout<<"\n\nThe items stockpiled in the inventory can be assembled to form a PC which";
+				cout<<" can\nthen be sold.";
+				cout<<"\n\nFour categories of PC's ranging from Home PC, Home Theatre PC, Mid Range";
+				cout<<" PC and\nHigh End PC can be assembled and sold.The user is then prompted to enter the";
+				cout<<"\nquantity of PC's he/she wants to sell of that category.";
+				cout<<"\n\nThe program alerts the user if sufficient quanitity of any item and/or in any";
+				cout<<"\nprice range is not available. The user is given the option of entering";
+				cout<<" a new\nquantity if the no. of items in the inventory is insufficient.";
+				cout<<"\n\nOnce the PC has been assembled, the details of all items that have been used to";
+				cout<<"\nassemble it are displayed and the PC is sold.";
+
+				break;
+			}
+
+		case 5:	{
+				clrscr();
+
+				cout<<"\n\t\t\t\tService Menu";
+				cout<<"\n\nAll the items that can be bought & the vendors from whom they can be bought";
+				cout<<" from'Buy an Item' feature are stored in a file which can be updated";
+				cout<<" by the user.";
+				cout<<"\n\nOptions for Adding, Deleting, Modifying and Viewing the lists of Items and";
+				cout<<"\nVendors are available in the Service Menu.";
+
+				break;
+			}
+
+		case 6:	{
+				clrscr();
+
+				cout<<setw(21)<<"\nCategories"<<setw(17)<<"Home PC"<<setw(12);
+				cout<<"HTPC"<<setw(16)<<"Mid Range PC"<<"High End PC\n";
+
+				for(i=0; i<14; i++)
+				{
+					cout<<"\n";
+
+					for(j=0;j<80;j++)
+					{
+						cout<<"-";
+						delay(20);
+					}
+
+					cout<<"\n"<<setw(20)<<categoryarr[i];
+
+					//Displaying price ranges for pc-categories
+					for(k=0; k<4; k++)
+					{
+						itoa(pricearr[k][i],str,10);
+
+						cout<<pricearr[k][i]<<"-";
+						if(k!=3)
+							cout<<setw(14-strlen(str));
+						cout<<pricearr[k+1][i];
+					}
+
+					if(i==13)
+					{
+						cout<<"\n";
+
+						for(j=0;j<80;j++)
+						{
+							cout<<"-";
+							delay(20);
+						}
+					}
+				}
+
+				cout<<"\nNOTE:\nThese values are in Rs and the lower pccategory is selected for common values";
+
+				break;
+			}
+
+		case 7:	return;
+
+		default : cout<<"\nEnter a Number from 1-7 only";
+	}
+
+	getch();
+	goto helplbl;
+}
+
+void setinventory()		//To update the inventory
+{
+	int ctr=0;
+
+	inventory i1;
+
+	i1.setcategory();
+	i1.setcompname();
+	i1.setpartno();
+	i1.setquantadd();
+	i1.setprice();
+	i1.setcost();
+	i1.setpccategory();
+
+	fstream fio("inventory.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'inventory' in read/write mode";
+		return;
+	}
+
+	while(fio.read((char*)&i2,sizeof(i2)))
+	{
+		if(fio.eof())
+			break;
+
+		//To determine if the item is bought is present in the inventory or not
+		if(!strcmpi(i1.getcategory(),i2.getcategory()))
+		{
+			if(!strcmpi(i1.getcompname(),i2.getcompname()))
+			{
+				if(!strcmpi(i1.getpartno(),i2.getpartno()))
+				{
+					ctr++;
+					break;
+				}
+			}
+		}
+	}
+
+	if(ctr==1)
+	{
+		i2.setquantadd();
+		i2.setcost();
+
+		place=fio.tellg()-sizeof(i2);
+		fio.seekg(place,ios::beg);
+
+		fio.write((char*)&i2,sizeof(i2));
+
+		fio.close();
+	}
+	else
+	{
+		fio.close();
+
+		fio.open("inventory.dat",ios::binary|ios::app);
+		if(!fio)
+		{
+			cout<<"\nError in opening the file 'inventory' in write mode";
+			return;
+		}
+
+		fio.write((char*)&i1,sizeof(i1));
+
+		fio.close();
+	}
+
+	cout<<"\nThe Inventory has been updated";
+}
+
+void sethistory()		//To write the history of transaction to the file
+{
+	history h1;
+
+	h1.setponumber();
+	h1.setdop();
+	h1.setcategory();
+	h1.setcompname();
+	h1.setpartno();
+	h1.setquant();
+	h1.setcost();
+	h1.setpccategory();
+	h1.setvendorname();
+
+	fstream fin("history.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'history' in read mode";
+		return;
+	}
+	ofstream fout("temp.dat",ios::binary|ios::out);
+	if(!fout)
+	{
+		cout<<"\nError in opening the file 'temp' in write mode";
+		return;
+	}
+
+	fout.write((char*)&h1,sizeof(h1));
+
+	while(fin.read((char*)&h2,sizeof(h2)))
+	{
+		if(fin.eof())
+			break;
+
+		fout.write((char*)&h2,sizeof(h2));
+	}
+
+	cout<<"\nThe History has been updated";
+
+	fin.close();
+	fout.close();
+	remove("history.dat");
+	rename("temp.dat","history.dat");
+}
+
+void updateponumber()		//To update po number after a transaction
+{
+	fstream fio("ponumber.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'ponumber' in read/write mode";
+		return;
+	}
+
+	while(fio.read((char*)&p1,sizeof(p1)))
+	{
+		if(fio.eof())
+			break;
+	}
+
+	fio.close();
+
+	p1.setponumber();
+
+	fio.open("ponumber.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'ponumber' in read/write mode";
+		return;
+	}
+
+	fio.write((char*)&p1,sizeof(p1));
+
+	fio.close();
+}
+
+void procurement()		//Function to buy items
+{
+	procurementlbl:
+
+	clrscr();
+
+	int j,switchchoice;
+
+	serial=0;
+
+	cout<<"\nIn which category would you like to buy items?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto procurementlbl;
+	}
+
+	switchchoice=choice;
+
+	displayitems(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto procurementlbl;
+	}
+
+	procurementlblsub1:
+
+	cout<<"\nWhich item would you like to buy?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto procurementlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto procurementlblsub1;
+	}
+
+	serial=0;
+
+	//To find the item previously selected
+	fstream fin("item.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'item' in read mode";
+		return;
+	}
+
+	while(fin.read((char*)&o2,sizeof(o2)))
+	{
+		if(!strcmpi(o2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial==choice)
+			break;
+	}
+
+	place=fin.tellg()-sizeof(o1);
+	fin.seekg(place,ios::beg);
+
+	fin.read((char*)&o1,sizeof(o1));
+
+	fin.close();
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto skip;
+	}
+
+	choice=switchchoice;
+
+	displayvendors(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto procurementlbl;
+	}
+
+	procurementlblsub2:
+
+	cout<<"\nFrom which vendor would you like to buy?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto procurementlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto procurementlblsub2;
+	}
+
+	serial=0;
+
+	fin.open("vendor.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'vendor' in read mode";
+		return;
+	}
+
+	//To find the vendor previosly selected
+	while(fin.read((char*)&a2,sizeof(a2)))
+	{
+		if(!strcmpi(a2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial==choice)
+			break;
+	}
+
+	place=fin.tellg()-sizeof(a2);
+	fin.seekg(place,ios::beg);
+
+	fin.read((char*)&a1,sizeof(a1));
+
+	fin.close();
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto skip;
+	}
+
+	procurementlblsub3:
+
+	cout<<"\nHow many would you like to buy?\t";
+	cin>>quantity;
+
+	if(quantity==0)
+		return;
+
+	if(quantity<a1.getmoq())
+	{
+		cout<<"\nYou cannot order below the moq\n";
+		getch();
+		goto procurementlblsub3;
+	}
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto skip;
+	}
+
+	fin.open("ponumber.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'ponumber' in read mode";
+	}
+
+	while(fin.read((char*)&p1,sizeof(p1)))
+	{
+		if(fin.eof())
+			break;
+	}
+
+	fin.close();
+
+	//If user chooses to redo the transaction, the detail is changed and program control comes here
+	skip:
+
+	if(quantity<a1.getmoq())
+	{
+		cout<<"\nQuantity ordered is less than this vendor's moq";
+		cout<<"\nDo you want to enter a new quantity [Y/N]?\t";
+		cin>>binarychoice;
+
+		if(binarychoice=='y' || binarychoice=='Y')
+			goto procurementlblsub3;
+		else if(binarychoice=='n' || binarychoice=='N')
+		{
+			choice=switchchoice;
+
+			displayvendors(0);
+
+			if(errorcode==1)
+			{
+				errorcode=0;
+				goto procurementlbl;
+			}
+
+			errorcode=1;
+
+			goto procurementlblsub2;
+		}
+		else
+		{
+			cout<<"\nEnter [Y/N] only";
+			getch();
+			goto skip;
+		}
+	}
+
+	cout<<"\nThe transaction details are as follows:\n\n";
+
+	for(j=0;j<80;j++)
+	{
+		cout<<"-";
+		delay(20);
+	}
+
+	cout<<setw(20)<<"\nPO number:"<<"PCN/"<<p1.getponumber();
+	cout<<setw(20)<<"\nDate of Purchase:";
+	d1.output();
+	cout<<setw(20)<<"\nCategory:"<<o1.getcategory();
+	cout<<setw(20)<<"\nCompany name:"<<o1.getcompname();
+	cout<<setw(20)<<"\nPart no:"<<o1.getpartno();
+	cout<<setw(20)<<"\nQuantity:"<<quantity;
+	cout<<setw(20)<<"\nTotal cost:"<<"Rs "<<o1.getprice()*quantity;
+	cout<<setw(20)<<"\nPC Category:"<<o1.getpccategory();
+	cout<<setw(20)<<"\nVendor:"<<a1.getvendorname()<<"\n\n";
+
+	for(j=0;j<80;j++)
+	{
+		cout<<"-";
+		delay(20);
+	}
+
+	procurementlblsub4:
+
+	cout<<"\n\nDo you want to proceed? [Y/N]\t";
+	cin>>binarychoice;
+
+	if(binarychoice=='y' || binarychoice=='Y')
+	{
+		setinventory();
+		sethistory();
+		updateponumber();
+
+		errorcode=0;
+
+		cout<<"\nThe transaction is successful";
+
+		getch();
+		goto procurementlbl;
+	}
+	else if((binarychoice=='n' || binarychoice=='N') || errorcode==1)
+	{
+		procurementlblsub5:
+
+		cout<<"\nDo you want to redo the transaction? [Y/N]\t";
+		cin>>binarychoice;
+
+		if(binarychoice=='y' || binarychoice=='Y')
+		{
+			cout<<"\nWhich detail would you like to modify?";
+			cout<<"\n[1]Category";
+			cout<<"\n[2]Item";
+			cout<<"\n[3]Vendor";
+			cout<<"\n[4]Quantity\n";
+			cin>>choice;
+
+			switch(choice)
+			{
+				case 1:	goto procurementlbl;
+
+				case 2: {
+						choice=switchchoice;
+
+						displayitems(0);
+
+						if(errorcode==1)
+						{
+							errorcode=0;
+							goto procurementlbl;
+						}
+
+						errorcode=1;
+
+						goto procurementlblsub1;
+					}
+
+				case 3:	{
+						choice=switchchoice;
+
+						displayvendors(0);
+
+						if(errorcode==1)
+						{
+							errorcode=0;
+							goto procurementlbl;
+						}
+
+						errorcode=1;
+
+						goto procurementlblsub2;
+					}
+
+				case 4:	goto procurementlblsub3;
+
+				default:        cout<<"\nEnter a no. from 1-4 only";
+			}
+
+		}
+		else if(binarychoice=='n' || binarychoice=='N')
+		{
+			errorcode=0;
+			return;
+		}
+		else
+		{
+			cout<<"\nEnter [Y/N] only";
+			getch();
+			goto procurementlblsub5;
+		}
+	}
+	else
+	{
+		cout<<"\nEnter [Y/N] only";
+		getch();
+		goto procurementlblsub4;
+	}
+}
+
+void inventorystock()		//Detailed inventory report
+{
+	clrscr();
+
+	//stockquantity[i][j]	-the totalquantity of components in each category in each pc-category
+	int i,j,k,ctr=0,stockquantity[4][14];
+
+	fstream fin;
+
+	for(i=0; i<4; i++)
+		for(j=0; j<14; j++)
+			stockquantity[i][j]=0;
+
+	//Pre-display analysis and initialisations
+	for(i=0; i<14; i++)
+	{
+		fin.open("inventory.dat", ios::binary|ios::in);
+		if(!fin)
+		{
+			cout<<"\nError in opening the file 'inventory' in read mode";
+			return;
+		}
+
+		while(fin.read((char*)&i2,sizeof(i2)))
+		{
+			if(fin.eof())
+				break;
+
+			if(!strcmpi(i2.getcategory(),categoryarr[i]))
+			{
+				for(k=0; k<4; k++)
+					if(i2.getprice()<=pricearr[k+1][i] && i2.getprice()>pricearr[k][i])
+						stockquantity[k][i]+=i2.getquant();
+			}
+		}
+
+		fin.close();
+	}
+
+	//Loop that displays inventory details
+	for(i=0; i<14; i++)
+	{
+		serial=0;
+
+		fin.open("inventory.dat",ios::binary|ios::in);
+		if(!fin)
+		{
+			cout<<"\nError in opening the file 'inventory' in read mode";
+			return;
+		}
+
+		while(fin.read((char*)&i2,sizeof(i2)))
+		{
+			if(fin.eof())
+				break;
+
+			if(!strcmpi(i2.getcategory(),categoryarr[i]))
+			{
+				serial++;
+				ctr++;
+
+				//To display only 8 records per page
+				if(serial%9==1 && ctr!=1)
+				{
+					textcolor(LIGHTGRAY);
+
+					cout<<"\nPress 'C' to continue or any other key to go back\t";
+					cin>>binarychoice;
+
+					if(binarychoice=='C' || binarychoice=='c')
+					{
+						clrscr();
+						ctr=1;
+					}
+					else
+					{
+						fin.close();
+						return;
+					}
+				}
+				if(ctr==1)
+				{
+					cout<<setw(8)<<"\nSr.No"<<setw(23)<<"Company"<<setw(13)<<"Part no";
+					cout<<setw(12)<<"Quantity"<<setw(12)<<"Cost"<<"PC Category\n\n";
+					cout<<i2.getcategory();
+				}
+
+				cout<<"\n";
+
+				for(j=0;j<80;j++)
+				{
+					cout<<"-";
+					delay(20);
+				}
+
+				cout<<"["<<serial;
+
+				itoa(serial,str,10);
+
+				cout<<setw(6-strlen(str))<<"]";
+
+				for(k=0; k<4; k++)
+					if(!strcmpi(i2.getpccategory(),pccategoryarr[k]))
+						break;
+
+				//If quantity is below safe value
+				if(stockquantity[k][i]<4)
+					textcolor(RED+BLINK);
+				else	textcolor(LIGHTGRAY);
+
+				i2.output();
+
+				for(j=0;j<80;j++)
+				{
+					cout<<"-";
+					delay(20);
+				}
+
+				cout<<"\n";
+			}
+		}
+
+		fin.close();
+	}
+
+	if(ctr==0)
+	{
+		cout<<"\nNo items exist in the inventory";
+		fin.close();
+		return;
+	}
+}
+
+void consolidatedreport()	//Inventory report at a glance
+{
+	clrscr();
+
+	//stockquantity[i][j]	-the totalquantity of components in each category in each pc-category
+	//totalquantity[i]	-the totalquantity of all components and in each category
+	//lowestquantity[i]	-the lowestquantity of any component in any category in each pc-category
+	int i,j,k,ctr=0,stockquantity[4][14],totalquantity[15],lowestquantity[4];
+
+	//inventoryvalue	-total value of all components in the inventory
+	double inventoryvalue=0;
+
+	fstream fin;
+
+	for(i=0; i<4; i++)
+		for(j=0; j<14; j++)
+			stockquantity[i][j]=0;
+
+	for(i=0; i<15; i++)
+		totalquantity[i]=0;
+
+	//Pre-display analysis and initialisations
+	for(i=0; i<14; i++)
+	{
+		fin.open("inventory.dat", ios::binary|ios::in);
+		if(!fin)
+		{
+			cout<<"\nError in opening the file 'inventory' in read mode";
+			return;
+		}
+
+		while(fin.read((char*)&i2,sizeof(i2)))
+		{
+			if(fin.eof())
+				break;
+
+			ctr++;
+
+			if(i==0)
+				inventoryvalue+=i2.getcost();
+
+			//Sort components in each category into each pc-category
+			if(!strcmpi(i2.getcategory(),categoryarr[i]))
+			{
+				for(k=0; k<4; k++)
+					if(i2.getprice()<=pricearr[k+1][i] && i2.getprice()>pricearr[k][i])
+						stockquantity[k][i]+=i2.getquant();
+			}
+		}
+
+		fin.close();
+	}
+
+	if(ctr==0)
+	{
+		cout<<"\nNo items exist in the inventory";
+		fin.close();
+		return;
+	}
+
+	cout<<setw(20)<<"\nCategories"<<setw(18)<<"Home PC"<<setw(13);
+	cout<<"HTPC"<<setw(16)<<"Mid Range PC"<<"High End PC\n";
+
+	for(i=0; i<14; i++)
+	{
+		cout<<"\n";
+
+		for(j=0;j<80;j++)
+		{
+			cout<<"-";
+			delay(20);
+		}
+
+		cout<<"\n"<<setw(22)<<categoryarr[i];
+
+		for(k=0; k<4; k++)
+		{
+			//If quantity is below safe value
+			if(stockquantity[k][i]<4)
+				textcolor(RED+BLINK);
+			else	textcolor(LIGHTGRAY);
+
+			if(k!=3)
+				cprintf("%-16i",stockquantity[k][i]);
+			else	cprintf("%i",stockquantity[k][i]);
+		}
+
+		if(i==13)
+		{
+			cout<<"\n";
+
+			for(j=0;j<80;j++)
+			{
+				cout<<"-";
+				delay(20);
+			}
+		}
+	}
+
+	textcolor(LIGHTGRAY);
+
+	//Proceed to next page with other details
+	cout<<"\n\nPress 'C' to continue or any other key to go back\t";
+	cin>>binarychoice;
+
+	if(binarychoice=='C' || binarychoice=='c')
+		clrscr();
+
+	else	return;
+
+	//Pre-display initialisations
+	for(i=0; i<14; i++)
+		for(j=0; j<4; j++)
+		{
+			totalquantity[i]+=stockquantity[j][i];
+			totalquantity[14]+=stockquantity[j][i];
+		}
+
+	for(j=0; j<4; j++)
+	{
+		lowestquantity[j]=stockquantity[j][0];
+
+		for(i=0; i<14; i++)
+			if(lowestquantity[j]>stockquantity[j][i])
+				lowestquantity[j]=stockquantity[j][i];
+	}
+
+	i=j=0;
+
+	delay(500);
+
+	cout<<"\nTotal items present:\t"<<totalquantity[14];
+
+	delay(500);
+
+	cout<<"\n\nCPU components";
+	delay(50);
+	cout<<setw(25)<<"\n[1]Chassis:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[2]Motherboard:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"\n[3]RAM:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[4]Hard Disk Drive:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"\n[5]DVD Writer:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[6]Graphics Card:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"\n[7]Processor:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[8]SMPS:"<<setw(15)<<totalquantity[i++];
+
+	delay(500);
+
+	cout<<"\n\nNon CPU components:";
+	delay(50);
+	cout<<setw(25)<<"\n[9]Keyboard:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[10]Mouse:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"\n[11]Speakers:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[12]UPS:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"\n[13]Monitor:"<<setw(15)<<totalquantity[i++];
+	delay(50);
+	cout<<setw(25)<<"[14]Operating System:"<<setw(15)<<totalquantity[i++];
+
+	delay(500);
+
+	cout<<"\n\n\nTotal Assemblable PC's\n";
+	delay(50);
+	cout<<setw(25)<<"\n[1]Home PC:"<<lowestquantity[j++];
+	delay(50);
+	cout<<setw(25)<<"\n[2]HTPC:"<<lowestquantity[j++];
+	delay(50);
+	cout<<setw(25)<<"\n[3]Mid Range PC:"<<lowestquantity[j++];
+	delay(50);
+	cout<<setw(25)<<"\n[4]High End PC:"<<lowestquantity[j++];
+
+	delay(500);
+
+	cout<<setw(30)<<"\n\n\nTotal Inventory Value:"<<"Rs "<<inventoryvalue;
+}
+
+void history()		//To display history of transaction
+{
+	clrscr();
+
+	int ctr=0;
+
+	fstream fin("history.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'history' in read mode";
+		return;
+	}
+
+	while(fin.read((char*)&h2,sizeof(h2)))
+	{
+		if(fin.eof())
+			break;
+
+		ctr++;
+
+		//To display only 3 transactions per page
+		if(ctr%3==1 && ctr!=1)
+		{
+			cout<<"\nPress 'C' to continue or any other key to go back\t";
+			cin>>binarychoice;
+
+			if(binarychoice=='C' || binarychoice=='c')
+				clrscr();
+
+			else
+			{
+				fin.close();
+				return;
+			}
+		}
+
+		h2.output();
+	}
+
+	if(ctr==0)
+	{
+		cout<<"\nNo history of transactions exists";
+		fin.close();
+		return;
+	}
+
+	fin.close();
+}
+
+void historypodeletion()	//Delete history by searching for entered po number
+{
+	//ponumber	-take po number to be deleted from the user
+	int ponumber,ctr=0;
+
+	cout<<"\nEnter 4 digit PO number of the transaction you want to delete:\t";
+	cin>>ponumber;
+
+	ifstream fin("history.dat",ios::binary);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'history' in read mode";
+		return;
+	}
+
+	while(fin.read((char*)&h2,sizeof(h2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(ponumber==h2.getponumber())
+		{
+			ctr++;
+			break;
+		}
+	}
+
+	fin.close();
+
+	if(ctr==1)
+	{
+		fin.open("history.dat", ios::binary);
+		if(!fin)
+		{
+			cout<<"\nError in opening the file 'history' in read mode";
+			return;
+		}
+		ofstream fout("temp.dat", ios::binary);
+		if(!fout)
+		{
+			cout<<"\nError in opening the file 'temp' in write mode";
+			return;
+		}
+
+		while(fin.read((char*)&h2,sizeof(h2)))
+		{
+			if(fin.eof())
+				break;
+
+			if(h2.getponumber()!=ponumber)
+				fout.write((char*)&h2,sizeof(h2));
+		}
+
+		cout<<"\nThe transaction has been deleted";
+
+		fin.close();
+		fout.close();
+		remove("history.dat");
+		rename("temp.dat","history.dat");
+	}
+
+	else
+	{
+		cout<<"\nThis PO number does not exist";
+	}
+}
+
+void historyfulldeletion()	//Delete complete history
+{
+	ofstream fout("history.dat",ios::binary|ios::trunc);
+	fout.close();
+
+	cout<<"\nAll history of transactions has been deleted";
+}
+
+void inventory()		//Menu to check the inventory and check or delete history
+{
+	inventorylbl:
+
+	clrscr();
+
+	cout<<"\n\t\t\t\tInventory\n";
+	cout<<"\n[1]View Inventory Stock";
+	cout<<"\n[2]View Consolidated Report";
+	cout<<"\n[3]History of Purchase";
+	cout<<"\n[4]Delete History by PO number";
+	cout<<"\n[5]Delete Full History";
+	cout<<"\n[6]Go back to Main Menu";
+	cout<<"\n\n\tEnter your choice:\t ";
+
+	cin>>choice;
+
+	switch(choice)
+	{
+		case 1:	{
+				inventorystock();
+				break;
+			}
+
+		case 2:	{
+				consolidatedreport();
+				break;
+			}
+
+		case 3:	{
+				history();
+				break;
+			}
+
+		case 4:	{
+				historypodeletion();
+				break;
+			}
+
+		case 5:	{
+				historyfulldeletion();
+				break;
+			}
+
+		case 6:	return;
+
+		default:	cout<<"\nEnter a no. from 1-6 only";
+	}
+
+	getch();
+	goto inventorylbl;
+}
+
+void inventorydeletion()	//Delete item details if quantity = 0
+{
+	fstream fin("inventory.dat", ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'inventory' in read mode";
+		return;
+	}
+	fstream fout("temp.dat", ios::binary|ios::out);
+	if(!fout)
+	{
+		cout<<"\nError in opening the file 'temp' in write mode";
+		return;
+	}
+
+	while(fin.read((char*)&i2,sizeof(i2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(i2.getquant()!=0)
+			fout.write((char*)&i2,sizeof(i2));
+	}
+
+	fin.close();
+	fout.close();
+	remove("inventory.dat");
+	rename("temp.dat","inventory.dat");
+}
+
+void assemblepc(int choice)		//To assemble and sell a pc
+{
+	/*
+	i		-loop variable
+	highestprice[i]	-stores the highest price of all items available in the ith category
+	row		-stores the row value to be used from pricearr for the range comparison
+	abort1,abort2	-errorcodes used as a switch (0 or 1)
+	*/
+	int i,j,ctr,highestprice[14],row=choice,abort1=0,abort2=0;
+
+	//totalcost	-totalcost of the assembled pc
+	float totalcost=0;
+
+	serial=0;
+
+	for(i=0; i<14; i++)
+		highestprice[i]=0;
+
+	assemblepclbl:
+
+	cout<<"\nHow many PC's would you like to sell?\t";
+	cin>>quantity;
+
+	if(quantity==0)
+		return;
+
+	if(quantity<0)
+	{
+		cout<<"\nYou cannot sell below zero\n";
+		getch();
+		goto assemblepclbl;
+	}
+
+	//lowestquantity-the lowest quantity of all selected components in all categories
+	//itemquantity	-the lowest quantity of any selected component in any category
+	int lowestquantity=quantity,itemquantity;
+
+	fstream fio;
+
+	for(i=0; i<14; i++)
+	{
+		ctr=0;
+
+		fio.open("inventory.dat", ios::binary|ios::in);
+		if(!fio)
+		{
+			cout<<"\nError in opening the file 'inventory' in read mode";
+			return;
+		}
+
+		while(fio.read((char*)&i2,sizeof(i2)))
+		{
+			if(fio.eof())
+				break;
+
+			//To find a suitable component, 1 category at a time
+			if(!strcmpi(i2.getcategory(),categoryarr[i]))
+			{
+				ctr++;
+
+				//Check whether the component is in the price range and is the costliest one or not
+				if(i2.getprice()>highestprice[i] && (i2.getprice()<=pricearr[row][i] && i2.getprice()>pricearr[row-1][i]))
+				{
+					highestprice[i]=i2.getprice();
+					itemquantity=i2.getquant();
+				}
+			}
+		}
+
+		//Error messages
+		if(ctr==0)
+		{
+			cout<<"\nNo items exist in the category: "<<categoryarr[i];
+			abort1=1;
+		}
+		else if(highestprice[i]==0)
+		{
+			cout<<"\nNo items in the required price range exist in the category: "<<categoryarr[i];
+			abort1=1;
+		}
+		else if(itemquantity<quantity)
+		{
+			cout<<"\nOnly "<<itemquantity<<" suitable items available in the category: "<<categoryarr[i];
+			abort2=1;
+		}
+
+		if(itemquantity<lowestquantity)
+			lowestquantity=itemquantity;
+
+		fio.close();
+
+		totalcost+=highestprice[i];
+	}
+
+	//If older quantity is greater than lowestquantity
+	if(abort1!=1 && abort2==1)
+	{
+		assemblepclblsub1:
+
+		cout<<"\n\nWould you like to enter a new quantity? [Y/N]\t";
+		cin>>binarychoice;
+
+		if(binarychoice=='y' || binarychoice=='Y')
+		{
+			assemblepclblsub2:
+
+			cout<<"\nEnter new quantity:\t";
+			cin>>quantity;
+
+			if(quantity<0)
+			{
+				cout<<"\nYou cannot sell below zero\n";
+				getch();
+				goto assemblepclblsub2;
+			}
+			if(quantity==0)
+				return;
+			if(quantity>lowestquantity)
+			{
+				cout<<"\nYou cannot sell more items than present in the inventory\n";
+				getch();
+				goto assemblepclblsub2;
+			}
+		}
+		else if(binarychoice=='n' || binarychoice=='N')
+			return;
+		else
+		{
+			cout<<"\nEnter [Y/N] only";
+			getch();
+			goto assemblepclblsub1;
+		}
+	}
+
+	//If all is well
+	if(abort1!=1)
+	{
+		cout<<setw(9)<<"\n\nSr.No"<<setw(25)<<"Company"<<setw(15);
+		cout<<"Part no"<<setw(15)<<"Quantity"<<"Cost\n";
+
+		for(i=0; i<14; i++)
+		{
+			fio.open("inventory.dat", ios::binary|ios::in|ios::out);
+			if(!fio)
+			{
+				cout<<"\nError in opening the file 'inventory' in read/write mode";
+				return;
+			}
+
+			//Find previously selected suitable components, 1 at a time
+			while(fio.read((char*)&i2,sizeof(i2)))
+			{
+				if(!strcmpi(i2.getcategory(),categoryarr[i]))
+				{
+					if(i2.getprice()==highestprice[i])
+					{
+						if(serial==6)
+						{
+							cout<<"\nPress any key to continue\t";
+							cin>>binarychoice;
+
+							clrscr();
+
+							cout<<setw(9)<<"\nSr.No"<<setw(25)<<"Company"<<setw(15);
+							cout<<"Part no"<<setw(15)<<"Quantity"<<"Cost\n";
+						}
+
+						//Display details of component parts
+						cout<<endl<<i2.getcategory();
+
+						cout<<"\n";
+
+						for(j=0;j<80;j++)
+						{
+							cout<<"-";
+							delay(20);
+						}
+
+						cout<<"["<<++serial;
+
+						itoa(serial,str,10);
+
+						cout<<setw(6-strlen(str))<<"]";
+
+						i2.outputsell();
+
+						for(j=0;j<80;j++)
+						{
+							cout<<"-";
+							delay(20);
+						}
+
+						i2.setquantdiff();
+						i2.setcost1();
+
+						break;
+					}
+				}
+			}
+
+			place=fio.tellg()-sizeof(i2);
+			fio.seekg(place,ios::beg);
+
+			fio.write((char*)&i2,sizeof(i2));
+
+			fio.close();
+
+			//Delete item details from inventory if quantity=0
+			if(i2.getquant()==0)
+				inventorydeletion();
+		}
+
+		cout<<"\nThe PC(s) has/have been assembled and sold";
+		cout<<"\nThe total cost of the PC(s) was:"<<totalcost*quantity;
+		cout<<"\nThe Inventory has been updated";
+	}
+}
+
+void sales()		//Menu to sell an assembled pc from items purchased
+{
+	saleslbl:
+
+	clrscr();
+
+	cout<<"\n\t\t\t\tSales Menu\n";
+	cout<<"\n[1]Home PC";
+	cout<<"\n[2]HTPC";
+	cout<<"\n[3]Mid range PC";
+	cout<<"\n[4]High end PC";
+	cout<<"\n[5]Back to main menu";
+	cout<<"\n\n\tEnter your choice:\t";
+
+	cin>>choice;
+
+	switch(choice)
+	{
+		case 1:	{
+				assemblepc(choice);
+				break;
+			}
+
+		case 2:	{
+				assemblepc(choice);
+				break;
+			}
+
+		case 3:	{
+				assemblepc(choice);
+				break;
+			}
+
+		case 4:	{
+				assemblepc(choice);
+				break;
+			}
+
+		case 5:	return;
+
+		default:	cout<<"\nEnter a no. from 1-5 only";
+	}
+
+	getch();
+	goto saleslbl;
+}
+
+void additem()		//To add details of items
+{
+	additemlbl:
+
+	clrscr();
+
+	cout<<"\nIn which category would you like to add items?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto additemlbl;
+	}
+
+	o1.setcategory();
+	o1.setcompname();
+
+	additemlblsub1:
+
+	o1.setpartno();
+
+	fstream fio("item.dat",ios::binary|ios::in);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'item' in read mode";
+		return;
+	}
+
+	while(fio.read((char*)&o2,sizeof(o2)))
+	{
+		if(fio.eof())
+			break;
+
+		if(!strcmpi(o2.getpartno(),o1.getpartno()))
+		{
+			cout<<"\nTwo items cannot have the same part no\n";
+			fio.close();
+			getch();
+			goto additemlblsub1;
+		}
+	}
+
+	fio.close();
+
+	additemlblsub2:
+
+	o1.setprice();
+
+	if(o1.getprice()<=0)
+	{
+		cout<<"\nPrice cannot be less than or equal to 0\n";
+		getch();
+		goto additemlblsub2;
+	}
+
+	//Limit the highest value of price that can be entered
+	if(o1.getprice()>pricearr[4][choice-1])
+	{
+		cout<<"\nPrice cannot be higher than Rs "<<pricearr[4][choice-1]<<endl;
+		getch();
+		goto additemlblsub2;
+	}
+
+	o1.setpccategory();
+
+	fio.open("item.dat",ios::binary|ios::app);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'item' in write mode";
+		return;
+	}
+
+	fio.write((char*)&o1,sizeof(o1));
+
+	cout<<"\n\nThe item has been added";
+
+	fio.close();
+
+	getch();
+	goto additemlbl;
+}
+
+void deleteitem()		//To delete details of items
+{
+	deleteitemlbl:
+
+	clrscr();
+
+	int switchchoice,flag=0;
+
+	cout<<"\nIn which category would you like to delete items?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto deleteitemlbl;
+	}
+
+	switchchoice=choice;
+
+	displayitems(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto deleteitemlbl;
+	}
+
+	deleteitemlblsub1:
+
+	cout<<"\nWhich item would you like to delete?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto deleteitemlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto deleteitemlblsub1;
+	}
+
+	serial=0;
+
+	//Process of Deletion of details of the selected item
+	fstream fin("item.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'item' in read mode";
+		return;
+	}
+	fstream fout("temp.dat", ios::binary|ios::out);
+	if(!fout)
+	{
+		cout<<"\nError in opening the file 'temp' in write mode";
+		return;
+	}
+
+	while(fin.read((char*)&o2,sizeof(o2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(!strcmpi(o2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial!=choice || flag==1)
+			fout.write((char*)&o2,sizeof(o2));
+		else	flag=1;
+	}
+
+	cout<<"\n\nThe item has been deleted";
+
+	fin.close();
+	fout.close();
+	remove("item.dat");
+	rename("temp.dat","item.dat");
+
+	getch();
+	goto deleteitemlbl;
+}
+
+void modifyitem()		//To modify details of items
+{
+	modifyitemlbl:
+
+	clrscr();
+
+	int switchchoice;
+
+	cout<<"\nIn which category would you like to modify items?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto modifyitemlbl;
+	}
+
+	switchchoice=choice;
+
+	displayitems(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto modifyitemlbl;
+	}
+
+	modifyitemlblsub1:
+
+	cout<<"\nWhich item would you like to modify?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto modifyitemlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto modifyitemlblsub1;
+	}
+
+	serial=0;
+
+	//Process of finding and reading the details of the selected item
+	fstream fio("item.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'item' in read/write mode";
+		return;
+	}
+
+	while(fio.read((char*)&o2,sizeof(o2)))
+	{
+		if(!strcmpi(o2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial==choice)
+			break;
+	}
+
+	place=fio.tellg()-sizeof(o1);
+	fio.seekg(place,ios::beg);
+
+	fio.read((char*)&o1,sizeof(o1));
+
+	fio.close();
+
+	cout<<"\n[1]Company name";
+	cout<<"\n[2]Part no";
+	cout<<"\n[3]Price";
+	cout<<"\n\n[4]None and go back\n";
+
+	modifyitemlblsub2:
+
+	cout<<"\nWhich detail would you like to modify?\n";
+	cin>>choice;
+
+	if(choice<1 || choice>4)
+	{
+		cout<<"\nEnter a no. from 1-4 only";
+		getch();
+		goto modifyitemlblsub2;
+	}
+
+	if(choice==1)
+	{
+		o1.setcompname();
+	}
+	else if(choice==2)
+	{
+		modifyitemlblsub3:
+
+		o1.setpartno();
+
+		fio.open("item.dat",ios::binary|ios::in|ios::out);
+		if(!fio)
+		{
+			cout<<"\nError in opening the file 'item' in read/write mode";
+			return;
+		}
+
+		while(fio.read((char*)&o2,sizeof(o2)))
+		{
+			if(fio.eof())
+				break;
+
+			if(fio.tellg()==(place+sizeof(o2)))
+				continue;
+
+			if(!strcmpi(o2.getpartno(),o1.getpartno()))
+			{
+				cout<<"\nTwo items cannot have the same part no\n";
+				fio.close();
+				getch();
+				goto modifyitemlblsub3;
+			}
+		}
+
+		fio.close();
+	}
+	else if(choice==3)
+	{
+		choice=switchchoice;
+
+		modifyitemlblsub4:
+
+		o1.setprice();
+
+		if(o1.getprice()<=0)
+		{
+			cout<<"\nPrice cannot be less than or equal to 0\n";
+			getch();
+			goto modifyitemlblsub4;
+		}
+
+		if(o1.getprice()>pricearr[4][choice-1])
+		{
+			cout<<"\nPrice cannot be higher than "<<pricearr[4][choice-1]<<endl;
+			getch();
+			goto modifyitemlblsub4;
+		}
+
+		o1.setpccategory();
+	}
+	else	goto modifyitemlbl;
+
+	//Writing the modified item detail back to the file
+	fio.open("item.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'item' in read/write mode";
+		return;
+	}
+
+	fio.seekg(place,ios::beg);
+	fio.write((char*)&o1,sizeof(o1));
+
+	cout<<"\n\nThe detail has been modified";
+
+	fio.close();
+
+	getch();
+	goto modifyitemlbl;
+}
+
+void viewitem()		//To view details of items
+{
+	viewitemlbl:
+
+	clrscr();
+
+	cout<<"\nIn which category would you like to view items?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto viewitemlbl;
+	}
+
+	displayitems(1);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto viewitemlbl;
+	}
+
+	cout<<endl;
+
+	getch();
+	goto viewitemlbl;
+}
+
+void addvendor()		//To add details of vendors
+{
+	addvendorlbl:
+
+	clrscr();
+
+	cout<<"\nIn which category would you like to add vendors?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto addvendorlbl;
+	}
+
+	a1.setcategory();
+
+	addvendorlblsub1:
+
+	a1.setvendorname();
+
+	//Check to avoid same vendor names in one category
+	fstream fio("vendor.dat", ios::binary|ios::in);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'vendor' in read mode";
+		return;
+	}
+
+	while(fio.read((char*)&a2,sizeof(a2)))
+	{
+		if(fio.eof())
+			break;
+
+		if(!strcmpi(a2.getcategory(),categoryarr[choice-1]))
+		{
+			if(!strcmpi(a2.getvendorname(),a1.getvendorname()))
+			{
+				cout<<"\nTwo vendors cannot have the same name\n";
+				fio.close();
+				getch();
+				goto addvendorlblsub1;
+			}
+		}
+	}
+
+	fio.close();
+
+	addvendorlblsub2:
+
+	a1.setmoq();
+
+	if(a1.getmoq()<=0)
+	{
+		cout<<"\nMinimum order quantity cannot be negative or zero\n";
+		getch();
+		goto addvendorlblsub2;
+	}
+
+	fio.open("vendor.dat", ios::binary|ios::app);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'vendor' in write mode";
+		return;
+	}
+
+	fio.write((char*)&a1,sizeof(a1));
+
+	cout<<"\n\nThe vendor has been added";
+
+	fio.close();
+
+	getch();
+	goto addvendorlbl;
+}
+
+void deletevendor()		//To delete details of vendors
+{
+	deletevendorlbl:
+
+	clrscr();
+
+	int switchchoice,flag=0;
+
+	cout<<"\nIn which category would you like to delete vendors?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto deletevendorlbl;
+	}
+
+	switchchoice=choice;
+
+	displayvendors(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto deletevendorlbl;
+	}
+
+	deletevendorlblsub1:
+
+	cout<<"\nWhich vendor would you like to delete?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto deletevendorlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto deletevendorlblsub1;
+	}
+
+	serial=0;
+
+	//Process of deletion of details of the selected vendor
+	fstream fin("vendor.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		cout<<"\nError in opening the file 'vendor' in read mode";
+		return;
+	}
+	fstream fout("temp.dat", ios::binary|ios::out);
+	if(!fout)
+	{
+		cout<<"\nError in opening the file 'temp' in write mode";
+		return;
+	}
+
+	while(fin.read((char*)&a2,sizeof(a2)))
+	{
+		if(fin.eof())
+			break;
+
+		if(!strcmpi(a2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial!=choice || flag==1)
+			fout.write((char*)&a2,sizeof(a2));
+		else	flag=1;
+	}
+
+	cout<<"\n\nThe vendor has been deleted";
+
+	fin.close();
+	fout.close();
+	remove("vendor.dat");
+	rename("temp.dat","vendor.dat");
+
+	getch();
+	goto deletevendorlbl;
+}
+
+void modifyvendor()		//To modify details of vendors
+{
+	modifyvendorlbl:
+
+	clrscr();
+
+	int switchchoice;
+
+	cout<<"\nIn which category would you like to modify vendors?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto modifyvendorlbl;
+	}
+
+	switchchoice=choice;
+
+	displayvendors(0);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto modifyvendorlbl;
+	}
+
+	modifyvendorlblsub1:
+
+	cout<<"\nWhich vendor would you like to modify?\n";
+	cin>>choice;
+
+	if(choice==serial)
+		goto modifyvendorlbl;
+
+	if(choice<1 || choice>serial)
+	{
+		cout<<"\nEnter a no. from 1-"<<serial<<" only\n";
+		getch();
+		goto modifyvendorlblsub1;
+	}
+
+	serial=0;
+
+	//Process of finding and reading the details of the selected item
+	fstream fio("vendor.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'vendor' in read/write mode";
+		return;
+	}
+
+	while(fio.read((char*)&a2,sizeof(a2)))
+	{
+		if(!strcmpi(a2.getcategory(),categoryarr[switchchoice-1]))
+			serial++;
+
+		if(serial==choice)
+			break;
+	}
+
+	place=fio.tellg()-sizeof(a2);
+	fio.seekg(place,ios::beg);
+
+	fio.read((char*)&a1,sizeof(a1));
+
+	fio.close();
+
+	cout<<"\n[1]Company name";
+	cout<<"\n[2]Minimum order quantity";
+	cout<<"\n\n[3]None and go back\n";
+
+	modifyvendorlblsub2:
+
+	cout<<"\nWhich detail would you like to modify?\n";
+	cin>>choice;
+
+	if(choice<1 || choice>3)
+	{
+		cout<<"\nEnter a no. from 1-3 only";
+		getch();
+		goto modifyvendorlblsub2;
+	}
+
+	if(choice==1)
+	{
+		modifyvendorlblsub3:
+
+		a1.setvendorname();
+
+		fio.open("vendor.dat",ios::binary|ios::in|ios::out);
+		if(!fio)
+		{
+			cout<<"\nError in opening the file 'vendor' in read/write mode";
+			return;
+		}
+
+		while(fio.read((char*)&a2,sizeof(a2)))
+		{
+			if(fio.eof())
+				break;
+
+			if(fio.tellg()==(place+sizeof(a2)))
+				continue;
+
+			if(!strcmpi(a2.getcategory(),a1.getcategory()))
+			{
+				if(!strcmpi(a2.getvendorname(),a1.getvendorname()))
+				{
+					cout<<"\nTwo vendors cannot have the same name\n";
+					fio.close();
+					getch();
+					goto modifyvendorlblsub3;
+				}
+			}
+		}
+
+		fio.close();
+	}
+	else if(choice==2)
+	{
+		modifyvendorlblsub4:
+
+		a1.setmoq();
+
+		if(a1.getmoq()<=0)
+		{
+			cout<<"\nMinimum order quantity cannot be negative or zero\n";
+			getch();
+			goto modifyvendorlblsub4;
+		}
+	}
+	else	goto modifyvendorlbl;
+
+	//Writing the modified item detail back to the file
+	fio.open("vendor.dat",ios::binary|ios::in|ios::out);
+	if(!fio)
+	{
+		cout<<"\nError in opening the file 'vendor' in read/write mode";
+		return;
+	}
+
+	fio.seekg(place,ios::beg);
+	fio.write((char*)&a1,sizeof(a1));
+
+	cout<<"\n\nThe detail has been modified";
+
+	fio.close();
+
+	getch();
+	goto modifyvendorlbl;
+}
+
+void viewvendor()		//To view details of vendors
+{
+	viewvendorlbl:
+
+	clrscr();
+
+	cout<<"\nIn which category would you like to view vendors?";
+
+	itemlist();
+
+	if(choice==15)
+		return;
+
+	if(choice>15 || choice<1)
+	{
+		cout<<"\nEnter a no. from 1-15 only";
+		getch();
+		goto viewvendorlbl;
+	}
+
+	displayvendors(1);
+
+	if(errorcode==1)
+	{
+		errorcode=0;
+		goto viewvendorlbl;
+	}
+
+	cout<<endl;
+
+	getch();
+	goto viewvendorlbl;
+}
+
+void service()		//Menu to update details of items and vendors
+{
+	servicelbl:
+
+	clrscr();
+
+	cout<<"\n\t\t\t\tService Menu\n";
+	cout<<"\n[1]Add another item";
+	cout<<"\n[2]Delete an item";
+	cout<<"\n[3]Modify an item";
+	cout<<"\n[4]View items";
+	cout<<"\n[5]Add another vendor";
+	cout<<"\n[6]Delete a vendor";
+	cout<<"\n[7]Modify a vendor";
+	cout<<"\n[8]View vendors";
+	cout<<"\n[9]Back to main menu";
+	cout<<"\n\n\tEnter your choice:\t";
+
+	cin>>choice;
+
+	switch(choice)
+	{
+		case 1:	{
+				additem();
+				break;
+			}
+
+		case 2:	{
+				deleteitem();
+				break;
+			}
+
+		case 3:	{
+				modifyitem();
+				break;
+			}
+
+		case 4:	{
+				viewitem();
+				break;
+			}
+
+		case 5:	{
+				addvendor();
+				break;
+			}
+
+		case 6:	{
+				deletevendor();
+				break;
+			}
+
+		case 7:	{
+				modifyvendor();
+				break;
+			}
+
+		case 8:	{
+				viewvendor();
+				break;
+			}
+
+		case 9:	return;
+
+		default:	cout<<"\nEnter a no. from 1-9 only";
+	}
+
+	getch();
+	goto servicelbl;
+}
+
+void install(int code)		//To install the program
+{
+	//Value=0 means function call is for installing
+	//Value=1 means function call is for unsinstalling
+	int value=code;
+
+	//Request auto detection
+	int gdriver = DETECT, gmode, errorcode;
+	int i,timer=500,leftcoordinate=193,rightcoordinate=200;
+
+	//Initialize graphics, local variables
+	initgraph(&gdriver, &gmode, "");
+
+	//Read result of initialization
+	errorcode = graphresult();
+
+	//An error occurred
+	if(errorcode != grOk)
+	{
+		printf("Graphics error: %s\n",grapherrormsg(errorcode));
+		printf("Press any key to halt:");
+		getch();
+		exit(0);
+	}
+
+	//Set the fill style
+	setfillstyle(EMPTY_FILL,WHITE);
+
+	//Draw the 3-d bar
+	bar3d(200,220,450,240,0,0);
+
+	if(value==0)
+	{
+		outtextxy(200,200,"INSTALLING");
+
+		ofstream fout("item.dat",ios::binary);
+		fout.close();
+		fout.open("vendor.dat",ios::binary);
+		fout.close();
+		fout.open("history.dat",ios::binary);
+		fout.close();
+		fout.open("inventory.dat",ios::binary);
+		fout.close();
+		fout.open("ponumber.dat",ios::binary);
+		fout.write((char*)&p1,sizeof(p1));
+		fout.close();
+
+	}
+	else
+	{
+		outtextxy(200,200,"UNINSTALLING");
+
+		remove("history.dat");
+		remove("item.dat");
+		remove("vendor.dat");
+		remove("ponumber.dat");
+		remove("inventory.dat");
+
+	}
+
+	setfillstyle(SOLID_FILL,GREEN);
+
+	for(i=0;i<25;i++)
+	{
+		delay(timer);
+
+		leftcoordinate+=10;
+		rightcoordinate+=10;
+
+		if(rightcoordinate>447)
+			rightcoordinate=447;
+
+		//draw the 2-D bars
+		bar(leftcoordinate,223,rightcoordinate,237);
+
+		timer-=15;
+	}
+
+	setcolor(BLACK);
+
+	if(value==0)
+	{
+		outtextxy(200,200,"INSTALLING");
+		setcolor(WHITE);
+		outtextxy(200,200,"INSTALLATION COMPLETE!");
+		getch();
+	}
+	else
+	{
+		outtextxy(200,200,"UNINSTALLING");
+		setcolor(WHITE);
+		outtextxy(200,200,"UNINSTALLATION COMPLETE!");
+		getch();
+		exit(0);
+	}
+
+	closegraph();
+}
+
+void tnc()		//Terms and conditions for installing the program
+{
+	clrscr();
+
+	cout<<"\n\t\t\t\tTERMS AND CONDITIONS";
+	cout<<"\n\n[1]Customer Acknowledgement:-\n";
+	cout<<"   The Customer must acknowledge with these terms and conditions to purchase\n";
+	cout<<"   products from PC-NET.";
+	cout<<"\n\n[2]Return Policy:-\n   Goods once purchased cannot be returned back.PC-NET is not";
+	cout<<"responsible for\n   manufacuturing defects.";
+	cout<<"\n\n[3]Warranty Information:-\n   All products sold by PC-NET are covered by the";
+	cout<<"\n   manufacturers warranty that accompanies the product unless otherwise stated.";
+	cout<<"    PC-NET does not warrant the performance of the products.";
+	cout<<"\n\n[4]Payment:-\n   The price shall be paid by the customer in FULL without any";
+	cout<<"\n   deduction irrespective of the claim made to avail discount on purchase.";
+	cout<<"\n\n[5]Errors and Omissions:-\n   PC-NET tries its best to offer the customer the most";
+	cout<<"\n   competetive pricing and accurate product information.Yet if an error is made";
+	cout<<"\n   or a product is listed at an incorrect price we will issue a refund.";
+	cout<<"\n\n[6]Court Disputes:-\n   All disputes regarding consumer courts shall be limited to Bangalore";
+	cout<<"\n   jurisdiction only.";
+	cout<<"\n\n\n\t\tI AGREE [Y]\t\t\tI DECLINE [N]\n";
+
+	tnclbl:
+
+	cin>>binarychoice;
+
+	if(binarychoice=='y' || binarychoice=='Y')
+	{
+		install(0);
+	}
+	else if(binarychoice=='n' || binarychoice=='N')
+		exit(0);
+	else
+	{
+		cout<<"\nEnter [Y/N] only\n";
+		getch();
+		goto tnclbl;
+	}
+}
+
+void main()		//Main menu of the program
+{
+	//To set the text mode
+	textmode(C4350);
+
+	fstream fin("item.dat",ios::binary|ios::in);
+	if(!fin)
+	{
+		tnc();
+	}
+	fin.close();
+
+	textmode(C4350);
+
+	//To make text left aligned with setw
+	cout.setf(ios::left);
+
+	//To set today's date
+	d1.setdate();
+
+	prgstart:
+
+	clrscr();
+
+	cout<<"\n\t\t\tC++ Program on Procurement, Sales and";
+	cout<<"\n\t\t\t\tInventory Management\n";
+	cout<<"\n[1]Help";
+	cout<<"\n[2]Buy an item";
+	cout<<"\n[3]Check the inventory";
+	cout<<"\n[4]Sell a PC";
+	cout<<"\n[5]Service Menu";
+	cout<<"\n[6]Uninstall the program";
+	cout<<"\n[7]Exit from the program";
+	cout<<"\n\n\tEnter your choice:\t";
+
+	cin>>choice;
+
+	switch(choice)
+	{
+		case 1:	{
+				help();
+				break;
+			}
+
+		case 2:	{
+				procurement();
+				break;
+			}
+
+		case 3:	{
+				inventory();
+				break;
+			}
+
+		case 4:	{
+				sales();
+				break;
+			}
+
+		case 5:	{
+				service();
+				break;
+			}
+
+		case 6:	{
+				install(1);
+				break;
+			}
+
+		case 7:	exit(0);
+
+		default:	cout<<"\nEnter a no. from 1-7 only";
+	}
+
+	getch();
+	goto prgstart;
+}
+
+
+
+
+
+
