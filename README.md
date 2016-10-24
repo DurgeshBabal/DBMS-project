@@ -2,6 +2,7 @@
 Inventory management program for DBMS
 
 Synopsis
+
 Introduction:
 
 This is a program that demonstrates functions of purchases, sales and inventory management that exist in most business environments. It is a simulation of a real life application based program. 
