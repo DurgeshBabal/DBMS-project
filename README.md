@@ -25,8 +25,10 @@ The user can see the details of the items present in the inventory in a detailed
 Once items of various categories have been stockpiled, the user can sell an assembled PC(s) of different price ranges (e.g High end gaming PC, Home PC etc.) with each type of PC containing 1 item of every category. The details of all components which have been used to assemble the PC, are displayed along with the total cost of the PC(s). The inventory is then updated accordingly.
 
 ####Hardware requirements:
-
+- 20 MB Storage
+- 20 MB Ram
 
 ####Software requirements:
-- MySql server 5.6
--
+- Linux System
+- MySql server 5.6 or later
+- g++ compiler ( To compile source code )
