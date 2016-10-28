@@ -31,6 +31,8 @@ Global variables:
 //#include<graphics>
 //#include<process>
 
+using namespace std;
+
 char categoryarr[14][17]={"Chassis","Motherboard","RAM","Hard Disk Drive","DVD Writer","Graphics Card","Processor","SMPS","Keyboard","Mouse","Speakers","UPS","Monitor","Operating System"};
 char pccategoryarr[4][11]={"Home PC","HTPC","Mid Range","High End"};
 char str[10],binarychoice;
