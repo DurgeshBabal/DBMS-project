@@ -20,22 +20,27 @@ Global variables:
 */
 
 //Header files being used
-#include<iostream>
-#include<fstream>
-//#include<conio>
-#include<stdio.h>
-#include<string>
-#include<stdlib.h>
-#include<iomanip>
+#include <iostream>
+#include <fstream>
+//#include <conio>
+#include <stdio.h>
+#include <string.h>
+#include <cstring>
+#include <stdlib.h>
+#include <iomanip>
 //#include<dos>
 //#include<graphics>
 //#include<process>
 
 // all local header definations
 #include "include/item.h"
+#include "include/vendor.h"
+#include "include/purchaseorderno.h"
 
 // local header source files
-#include "source/item.cpp"
+#include "src/item.cpp"
+#include "src/vendor.cpp"
+#include "src/purchaseorderno.cpp"
 
 using namespace std;
 
@@ -54,5 +59,7 @@ int choice,place,quantity,errorcode=0,serial;
 int main(int argc, char const *argv[]) {
   /* code */
   cout<<"this is test main file";
+	item i1;
+	i1.test();
   return 0;
 }
