@@ -5,19 +5,13 @@ class purchaseorderno
 {
 	int ponumber;
 
-     public:
-	purchaseorderno()
-	{
-		ponumber=1000;
-	}
-	int getponumber()
-	{
-		return ponumber;
-	}
-	void setponumber()
-	{
-		ponumber++;
-	}
+  public:
+	purchaseorderno();
+
+	int getponumber();
+
+	void setponumber();
+	
 };
 
 #endif
