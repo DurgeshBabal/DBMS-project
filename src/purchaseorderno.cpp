@@ -2,15 +2,17 @@
 
 using namespace std;
 
-	purchaseorderno()
+	purchaseorderno::purchaseorderno()
 	{
 		ponumber=1000;
 	}
-	int getponumber()
+
+	int purchaseorderno::getponumber()
 	{
 		return ponumber;
 	}
-	void setponumber()
+
+	void purchaseorderno::setponumber()
 	{
 		ponumber++;
 	}
