@@ -32,6 +32,8 @@ public:
 	void setpccategory();
 
   void output();
+
+	void test();
 };
 
 #endif
