@@ -54,11 +54,13 @@ using namespace std;
 
   void inventory::setquantadd()
   {
+    extern int quantity;
     quant += quantity;
   }
 
   void inventory::setquantdiff()
   {
+    extern int quantity;
     quant -= quantity;
   }
 
@@ -100,6 +102,7 @@ using namespace std;
 
   void inventory::outputsell()
   {
+    extern int quantity;
     cout << setw(25) << compname << setw(17) << partno << setw(11);
     cout << quantity << "Rs " << cost << endl;
   }

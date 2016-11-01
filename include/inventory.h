@@ -12,8 +12,9 @@ class inventory
 	char pccategory[11];
 
   public:
-	inventory();
-  
+
+  inventory();
+
 	char* getcategory();
 
 	char setcategory();

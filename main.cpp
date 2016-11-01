@@ -36,11 +36,17 @@ Global variables:
 #include "include/item.h"
 #include "include/vendor.h"
 #include "include/purchaseorderno.h"
+#include "include/inventory.h"
+#include "include/dop.h"
+#include "include/history.h"
 
 // local header source files
 #include "src/item.cpp"
 #include "src/vendor.cpp"
 #include "src/purchaseorderno.cpp"
+#include "src/inventory.cpp"
+#include "src/dop.cpp"
+#include "src/history.cpp"
 
 using namespace std;
 
