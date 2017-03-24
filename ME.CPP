@@ -20,16 +20,18 @@ Global variables:
 */
 
 //Header files being used
-
-#include<fstream.h>
-#include<conio.h>
+#include<iostream>
+#include<fstream>
+//#include<conio>
 #include<stdio.h>
-#include<string.h>
+#include<string>
 #include<stdlib.h>
-#include<iomanip.h>
-#include<dos.h>
-#include<graphics.h>
-#include<process.h>
+#include<iomanip>
+//#include<dos>
+//#include<graphics>
+//#include<process>
+
+using namespace std;
 
 char categoryarr[14][17]={"Chassis","Motherboard","RAM","Hard Disk Drive","DVD Writer","Graphics Card","Processor","SMPS","Keyboard","Mouse","Speakers","UPS","Monitor","Operating System"};
 char pccategoryarr[4][11]={"Home PC","HTPC","Mid Range","High End"};
@@ -3048,9 +3050,3 @@ void main()		//Main menu of the program
 	getch();
 	goto prgstart;
 }
-
-
-
-
-
-
