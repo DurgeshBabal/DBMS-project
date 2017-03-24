@@ -1,6 +1,4 @@
-# DBMS-project
-Inventory management program for DBMS
-
+# Inventory management program
 ###Synopsis
 
 ####Introduction:
@@ -29,6 +27,5 @@ Once items of various categories have been stockpiled, the user can sell an asse
 - 20 MB Ram
 
 ####Software requirements:
-- Linux System
-- MySql server 5.6 or later
-- g++ compiler ( To compile source code )
+- Windows System
+- Turbo C++ compiler ( To compile source code )
